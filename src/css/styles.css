@@ -1,0 +1,347 @@
+/* General Reset */
+* {
+  font-family: "Roboto", sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  outline: none;
+  border: none;
+  transition: 0.2s linear;
+  text-transform: capitalize;
+  text-decoration: none;
+  scroll-behavior: smooth;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  background-color: rgb(0, 0, 0);  /* Set body background to black */
+  overflow-x: hidden;
+}
+
+/* Header */
+.header {
+  background-color: rgb(0, 0, 0);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 7%;
+  border-bottom: 0.2rem solid yellow;
+  position: fixed;  /* Keep navbar fixed at the top */
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;  /* Keep navbar above other content */
+}
+
+.header .logo img {
+  max-width: 75px;
+}
+
+.header .navbar a {
+  color: #fff;
+  margin: 0 1rem;
+  font-size: 1.2rem;
+}
+
+.header .navbar a:hover {
+  color: yellow;
+  border-bottom: 0.1rem solid yellow;
+  padding-bottom: 0.5rem;
+}
+
+.header .icons div {
+  gap: 5rem;
+  color: white;
+  margin: 0 1rem;
+  cursor: pointer;
+  font-size: 1.5rem;
+}
+
+.header .icons div:hover {
+  color: yellow;
+}
+
+.fas.fa-heart:hover {
+  color: red;
+}
+
+#menu-button {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  #menu-button {
+    display: inline-block;
+  }
+  .header .navbar {
+    position: absolute;
+    top: 100%;
+    right: -100%;
+    background: #000;
+    width: 30rem;
+    height: calc(100vh - 9.5rem);
+  }
+  .header .navbar.active {
+    right: 0;
+  }
+  .header .navbar a {
+    color: #fff;
+    display: block;
+    margin: 1.5rem;
+  }
+}
+
+.header .search-form {
+  position: absolute;
+  top: 115%;
+  right: 7%;
+  background: #fff;
+  width: 30rem;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  transform: scaleY(0);
+  transform-origin: top;
+}
+
+.header .search-form.active {
+  transform: scaleY(1);
+}
+
+.header .search-form input {
+  height: 100%;
+  width: 100%;
+  font-size: 1.5rem;
+  color: #13131a;
+  padding: 1rem;
+  text-transform: none;
+}
+
+.header .search-form label {
+  cursor: pointer;
+  font-size: 2.2rem;
+  margin-right: 1.5rem;
+  color: #13131a;
+}
+
+.header .search-form label:hover {
+  color: yellow;
+}
+
+/* Home Section */
+.home {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  background: url('../images/homepage.png') no-repeat;
+  background-size: cover;
+  background-position: center;
+}
+
+.home .content {
+  max-width: 60rem;
+  margin-left: 3rem;
+}
+
+h1 span {
+  color: yellow;
+  font-family: 'Dancing Script', cursive;
+  font-size: 3rem;
+  text-transform: uppercase;
+}
+
+.home .content p {
+  font-size: 1.2rem;
+  margin-top: 20px;
+  text-transform: uppercase;
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  color: white;
+}
+
+/* About.css */
+
+.about {
+  padding: 60px 20px;
+  background-color: #000;
+  color: #ffe0e0;
+  text-align: center;
+  height: 100vh;
+  font-family: 'Roboto', sans-serif;
+}
+
+.about h1 {
+  color: #ff6600;
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+
+  font-family: cursive;
+}
+
+.about p {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  margin: 15px 0;
+}
+
+.about p strong {
+  color: #ff4500;
+}
+
+.about ul {
+  list-style: circle inside;
+  margin: 15px 0;
+  padding-left: 0;
+}
+
+.about ul li {
+  margin: 8px 0;
+  font-size: 1.05rem;
+}
+
+@media screen and (max-width: 768px) {
+  .about h1 {
+    font-size: 2rem;
+  }
+  
+  .about p, .about ul li {
+    font-size: 1rem;
+  }
+}
+
+
+
+.recipes-container {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 40px;
+  gap: 12px;
+}
+
+.recipe-card {
+  width: 250px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+  background: #050505;
+  color: #fff;
+}
+
+.recipe-card img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.recipe-card h3 {
+  font-size: small;
+  color: rgb(255, 255, 255);
+  margin: 10px 0 5px;
+}
+
+.recipe-card p {
+  font-size: 1rem;
+  color: #918d8d;
+}
+.notification {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  background: yellow;
+  color: black;
+  padding: 10px 15px;
+  border-radius: 5px;
+  font-weight: bold;
+  z-index: 2000;
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
+
+
+.view-btn {
+  background-color: yellow;
+  color: black;
+  border-radius: 5px;
+  padding: 5px 12px;
+  cursor: pointer;
+  font-weight: bold;
+  border: none;
+  transition: 0.2s;
+}
+
+.view-btn:hover {
+  background-color: orange;
+  color: white;
+}
+
+/* Modal styling */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+}
+
+.modal-content {
+  background: #000000;
+  padding: 20px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 700px;
+  max-height: 90%;
+  overflow-y: auto;
+  color: white;
+  position: relative;
+}
+
+.modal-content .close {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  font-size: 2rem;
+  cursor: pointer;
+  color: yellow;
+}
+
+.modal-heading {
+  color: yellow;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.modal-img {
+  width: 50%;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.modal-text {
+  color: white;
+  line-height: 1.5rem;
+}
+.modal strong{
+  display: grid;
+  justify-content: center;
+  color: rgb(10, 209, 70);
+  font-size: 1.3rem;
+  margin: 15px;
+}
+.youtube-link {
+  display: inline-block;
+  margin-top: 10px;
+  color: red;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.youtube-link i {
+  margin-right: 5px;
+}
+

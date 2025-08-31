@@ -1,0 +1,181 @@
+import React, { useEffect, useState } from "react";
+
+// Function to fetch all recipes from MealDB
+export const fetchAllRecipes = async () => {
+  try {
+    const categories = ["Beef", "Chicken", "Dessert", "Lamb", "Pasta", "Seafood", "Vegetarian"];
+    const allData = await Promise.all(
+      categories.map(async (cat) => {
+        const res = await fetch(`https://www.themealdb.com/api/json/v1/1/filter.php?c=${cat}`);
+        const data = await res.json();
+        if (data.meals) {
+          return data.meals.map((meal) => ({ ...meal, strCategory: cat }));
+        }
+        return [];
+      })
+    );
+    return allData.flat();
+  } catch (err) {
+    console.error("Error fetching recipes:", err);
+    return [];
+  }
+};
+
+// Function to fetch full recipe details by ID
+export const fetchRecipeById = async (id) => {
+  try {
+    const res = await fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${id}`);
+    const data = await res.json();
+    return data.meals ? data.meals[0] : null;
+  } catch (err) {
+    console.error("Error fetching recipe details:", err);
+    return null;
+  }
+};
+
+const AllRecipes = ({ searchTerm }) => {
+  const [recipes, setRecipes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [likedIds, setLikedIds] = useState([]);
+  const [modalRecipe, setModalRecipe] = useState(null);
+  const [rating, setRating] = useState({});
+useEffect(() => {
+  const handleStorageChange = () => {
+    const likes = JSON.parse(localStorage.getItem("likedRecipes") || "[]");
+    setLikedIds(likes.map((item) => item.idMeal));
+  };
+
+  window.addEventListener("storage", handleStorageChange);
+  return () => window.removeEventListener("storage", handleStorageChange);
+}, []);
+
+  useEffect(() => {
+    const getRecipes = async () => {
+      const data = await fetchAllRecipes();
+      setRecipes(data);
+      setLoading(false);
+
+      const likes = JSON.parse(localStorage.getItem("likedRecipes") || "[]");
+      setLikedIds(likes.map((item) => item.idMeal));
+
+      const savedRatings = JSON.parse(localStorage.getItem("recipeRatings") || "{}");
+      setRating(savedRatings);
+    };
+    getRecipes();
+  }, []);
+
+  const toggleLike = (recipe) => {
+    let liked = JSON.parse(localStorage.getItem("likedRecipes") || "[]");
+    const exists = liked.find((item) => item.idMeal === recipe.idMeal);
+
+    if (exists) {
+      liked = liked.filter((item) => item.idMeal !== recipe.idMeal);
+    } else {
+      liked.push(recipe);
+    }
+
+    localStorage.setItem("likedRecipes", JSON.stringify(liked));
+    window.dispatchEvent(new Event("storage")); // Navbar sync
+    setLikedIds(liked.map((item) => item.idMeal));
+    alert(exists ? "Recipe removed from saved!" : "Recipe saved!");
+  };
+
+  const handleView = async (id) => {
+    const recipeDetails = await fetchRecipeById(id);
+    setModalRecipe(recipeDetails);
+  };
+
+  const handleRating = (idMeal, value) => {
+    const updatedRating = { ...rating, [idMeal]: value };
+    setRating(updatedRating);
+    localStorage.setItem("recipeRatings", JSON.stringify(updatedRating));
+  };
+
+  const filteredRecipes = recipes.filter((recipe) =>
+    (recipe.strMeal || "").toLowerCase().includes((searchTerm || "").toLowerCase())
+  );
+
+  return (
+    <>
+      <section className="recipes" id="recipes">
+        <h1>All Recipes</h1>
+        {loading ? (
+          <p>Loading recipes...</p>
+        ) : filteredRecipes.length === 0 ? (
+          <p style={{ color: "yellow", fontSize: "1.2rem" }}>
+            Sorry, but this recipe is not in our dataset!
+          </p>
+        ) : (
+          <div className="recipes-container">
+            {filteredRecipes.map((recipe) => (
+              <div key={recipe.idMeal} className="recipe-card">
+                <img src={recipe.strMealThumb} alt={recipe.strMeal} />
+                <h3>{recipe.strMeal}</h3>
+                <div style={{ display: "flex", justifyContent: "space-around", marginTop: "10px" }}>
+                  <i
+                    className="fas fa-heart"
+                    style={{ color: likedIds.includes(recipe.idMeal) ? "red" : "white", cursor: "pointer", fontSize: "1.5rem" }}
+                    onClick={() => toggleLike(recipe)}
+                  ></i>
+                  <button className="view-btn" onClick={() => handleView(recipe.idMeal)}>View</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {modalRecipe && (
+  <div className="modal">
+    <div className="modal-content">
+      <span className="close" onClick={() => setModalRecipe(null)}>&times;</span>
+      <h2 className="modal-heading">{modalRecipe.strMeal}</h2>
+      <img src={modalRecipe.strMealThumb} alt={modalRecipe.strMeal} className="modal-img"/>
+      
+      <p><strong>Category:</strong> <span className="modal-text">{modalRecipe.strCategory}</span></p>
+      
+      <p><strong>Ingredients:</strong></p>
+      <ul className="modal-text">
+        {Array.from({ length: 20 }, (_, i) => i + 1)
+          .map((n) => {
+            const ingredient = modalRecipe[`strIngredient${n}`];
+            const measure = modalRecipe[`strMeasure${n}`];
+            if (ingredient && ingredient.trim() !== "") {
+              return <li key={n}>{measure} {ingredient}</li>;
+            }
+            return null;
+          })}
+      </ul>
+      
+      <p><strong>Instructions:</strong></p>
+      <ul className="modal-text">
+        {modalRecipe.strInstructions
+          ? modalRecipe.strInstructions.split('. ').map((inst, idx) => inst.trim() && <li key={idx}>{inst}.</li>)
+          : <li>Not available</li>}
+      </ul>
+
+      {modalRecipe.strYoutube && (
+        <a href={modalRecipe.strYoutube} target="_blank" rel="noreferrer" className="youtube-link">
+          <i className="fab fa-youtube"></i> Watch on YouTube
+        </a>
+      )}
+
+      <div style={{ marginTop: "10px" }}>
+        <strong>Rate this recipe: </strong>
+        {[1, 2, 3, 4, 5].map((star) => (
+          <span
+            key={star}
+            onClick={() => handleRating(modalRecipe.idMeal, star)}
+            style={{ cursor: "pointer", color: (rating[modalRecipe.idMeal] || 0) >= star ? "gold" : "gray", fontSize: "1.5rem" }}
+          >★</span>
+        ))}
+      </div>
+    </div>
+  </div>
+)}
+
+    </>
+  );
+};
+
+export default AllRecipes;
