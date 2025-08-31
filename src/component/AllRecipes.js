@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-// Function to fetch all recipes from MealDB
+// Fetch all recipes from MealDB
 export const fetchAllRecipes = async () => {
   try {
     const categories = ["Beef", "Chicken", "Dessert", "Lamb", "Pasta", "Seafood", "Vegetarian"];
@@ -21,7 +21,7 @@ export const fetchAllRecipes = async () => {
   }
 };
 
-// Function to fetch full recipe details by ID
+// Fetch full recipe details by ID
 export const fetchRecipeById = async (id) => {
   try {
     const res = await fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${id}`);
@@ -40,16 +40,17 @@ const AllRecipes = ({ searchTerm }) => {
   const [modalRecipe, setModalRecipe] = useState(null);
   const [rating, setRating] = useState({});
 
+  // Sync likes from localStorage
   useEffect(() => {
     const handleStorageChange = () => {
       const likes = JSON.parse(localStorage.getItem("likedRecipes") || "[]");
       setLikedIds(likes.map((item) => item.idMeal));
     };
-
     window.addEventListener("storage", handleStorageChange);
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
+  // Fetch recipes on mount
   useEffect(() => {
     const getRecipes = async () => {
       const data = await fetchAllRecipes();
@@ -65,6 +66,7 @@ const AllRecipes = ({ searchTerm }) => {
     getRecipes();
   }, []);
 
+  // Like/Unlike recipe
   const toggleLike = (recipe) => {
     let liked = JSON.parse(localStorage.getItem("likedRecipes") || "[]");
     const exists = liked.find((item) => item.idMeal === recipe.idMeal);
@@ -76,89 +78,126 @@ const AllRecipes = ({ searchTerm }) => {
     }
 
     localStorage.setItem("likedRecipes", JSON.stringify(liked));
-    window.dispatchEvent(new Event("storage")); // Navbar sync
+    window.dispatchEvent(new Event("storage")); // sync with navbar if needed
     setLikedIds(liked.map((item) => item.idMeal));
     alert(exists ? "Recipe removed from saved!" : "Recipe saved!");
   };
 
+  // View recipe details in modal
   const handleView = async (id) => {
     const recipeDetails = await fetchRecipeById(id);
-
-    // Dummy servings and cooking time (for assignment purpose)
-    recipeDetails.servings = "2-3";
-    recipeDetails.time = "30 mins";
-
-    setModalRecipe(recipeDetails);
+    if (recipeDetails) {
+      recipeDetails.servings = "2-3";
+      recipeDetails.time = "30 mins";
+      setModalRecipe(recipeDetails);
+    }
   };
 
+  // Rate recipe
   const handleRating = (idMeal, value) => {
     const updatedRating = { ...rating, [idMeal]: value };
     setRating(updatedRating);
     localStorage.setItem("recipeRatings", JSON.stringify(updatedRating));
   };
 
-  const filteredRecipes = recipes.filter((recipe) =>
-    (recipe.strMeal || "").toLowerCase().includes((searchTerm || "").toLowerCase())
-  );
+  // Search filter
+  const query = searchTerm.trim();
+  const filteredRecipes = query
+    ? recipes.filter((recipe) =>
+        (recipe.strMeal || "").toLowerCase().includes(query.toLowerCase())
+      )
+    : recipes;
+
+  // Decide what to render
+  let content;
+  if (loading) {
+    content = <p>Loading recipes...</p>;
+  } else if (query && filteredRecipes.length === 0) {
+    content = (
+      <p style={{ color: "yellow", fontSize: "1.2rem" }}>
+        Sorry, this recipe is not in our dataset!
+      </p>
+    );
+  } else {
+    content = (
+      <div className="recipes-container">
+        {filteredRecipes.map((recipe) => (
+          <div key={recipe.idMeal} className="recipe-card">
+            <img src={recipe.strMealThumb} alt={recipe.strMeal} />
+            <h3>{recipe.strMeal}</h3>
+            <div style={{ display: "flex", justifyContent: "space-around", marginTop: "10px" }}>
+              <i
+                className="fas fa-heart"
+                style={{
+                  color: likedIds.includes(recipe.idMeal) ? "red" : "white",
+                  cursor: "pointer",
+                  fontSize: "1.5rem",
+                }}
+                onClick={() => toggleLike(recipe)}
+              ></i>
+              <button className="view-btn" onClick={() => handleView(recipe.idMeal)}>
+                View
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <>
       <section className="recipes" id="recipes">
         <h1>All Recipes</h1>
-        {loading ? (
-          <p>Loading recipes...</p>
-        ) : filteredRecipes.length === 0 ? (
-          <p style={{ color: "yellow", fontSize: "1.2rem" }}>
-            Sorry, but this recipe is not in our dataset!
-          </p>
-        ) : (
-          <div className="recipes-container">
-            {filteredRecipes.map((recipe) => (
-              <div key={recipe.idMeal} className="recipe-card">
-                <img src={recipe.strMealThumb} alt={recipe.strMeal} />
-                <h3>{recipe.strMeal}</h3>
-                <div style={{ display: "flex", justifyContent: "space-around", marginTop: "10px" }}>
-                  <i
-                    className="fas fa-heart"
-                    style={{ color: likedIds.includes(recipe.idMeal) ? "red" : "white", cursor: "pointer", fontSize: "1.5rem" }}
-                    onClick={() => toggleLike(recipe)}
-                  ></i>
-                  <button className="view-btn" onClick={() => handleView(recipe.idMeal)}>View</button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        {content}
       </section>
 
+      {/* Modal */}
       {modalRecipe && (
         <div className="modal">
           <div className="modal-content">
-            <span className="close" onClick={() => setModalRecipe(null)}>&times;</span>
+            <span className="close" onClick={() => setModalRecipe(null)}>
+              &times;
+            </span>
             <h2 className="modal-heading">{modalRecipe.strMeal}</h2>
             <img src={modalRecipe.strMealThumb} alt={modalRecipe.strMeal} className="modal-img" />
 
-            <p><strong>Category:</strong> <span className="modal-text">{modalRecipe.strCategory}</span></p>
-            <p><strong>Servings:</strong> {modalRecipe.servings}</p>
-            <p><strong>Cooking Time:</strong> {modalRecipe.time}</p>
+            <p>
+              <strong>Category:</strong> <span className="modal-text">{modalRecipe.strCategory}</span>
+            </p>
+            <p>
+              <strong>Servings:</strong> {modalRecipe.servings}
+            </p>
+            <p>
+              <strong>Cooking Time:</strong> {modalRecipe.time}
+            </p>
 
-            <p><strong>Ingredients:</strong></p>
+            <p>
+              <strong>Ingredients:</strong>
+            </p>
             <ul className="modal-text">
-              {Array.from({ length: 20 }, (_, i) => i + 1)
-                .map((n) => {
-                  const ingredient = modalRecipe[`strIngredient${n}`];
-                  const measure = modalRecipe[`strMeasure${n}`];
-                  if (ingredient && ingredient.trim() !== "") {
-                    return <li key={n}>{measure} {ingredient}</li>;
-                  }
-                  return null;
-                })}
+              {Array.from({ length: 20 }, (_, i) => i + 1).map((n) => {
+                const ingredient = modalRecipe[`strIngredient${n}`];
+                const measure = modalRecipe[`strMeasure${n}`];
+                if (ingredient && ingredient.trim() !== "") {
+                  return (
+                    <li key={n}>
+                      {measure} {ingredient}
+                    </li>
+                  );
+                }
+                return null;
+              })}
             </ul>
 
-            <p><strong>Instructions:</strong></p>
+            <p>
+              <strong>Instructions:</strong>
+            </p>
             <ul className="modal-text">
               {modalRecipe.strInstructions
-                ? modalRecipe.strInstructions.split('. ').map((inst, idx) => inst.trim() && <li key={idx}>{inst}.</li>)
+                ? modalRecipe.strInstructions.split(". ").map(
+                    (inst, idx) => inst.trim() && <li key={idx}>{inst}.</li>
+                  )
                 : <li>Not available</li>}
             </ul>
 
@@ -174,8 +213,14 @@ const AllRecipes = ({ searchTerm }) => {
                 <span
                   key={star}
                   onClick={() => handleRating(modalRecipe.idMeal, star)}
-                  style={{ cursor: "pointer", color: (rating[modalRecipe.idMeal] || 0) >= star ? "gold" : "gray", fontSize: "1.5rem" }}
-                >★</span>
+                  style={{
+                    cursor: "pointer",
+                    color: (rating[modalRecipe.idMeal] || 0) >= star ? "gold" : "gray",
+                    fontSize: "1.5rem",
+                  }}
+                >
+                  ★
+                </span>
               ))}
             </div>
           </div>
