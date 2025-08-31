@@ -121,7 +121,7 @@ html, body {
   top: 115%;
   right: 7%;
   background: #fff;
-  width: 30rem;
+  max-width: 30rem;
   height: 3rem;
   display: flex;
   align-items: center;
@@ -369,4 +369,3 @@ h1 span {
 .youtube-link i {
   margin-right: 5px;
 }
-
