@@ -111,14 +111,39 @@ const AllRecipes = ({ searchTerm }) => {
   // Decide what to render
   let content;
   if (loading) {
-    content = <p>Loading recipes...</p>;
-  } else if (query && filteredRecipes.length === 0) {
-    content = (
-      <p style={{ color: "yellow", fontSize: "1.2rem" }}>
-        Sorry, this recipe is not in our dataset!
-      </p>
-    );
-  } else {
+  content = (
+    <p
+      style={{
+        color: "yellow",
+        fontSize: "1.2rem",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        height: "60vh", // centers vertically
+        textAlign: "center",
+      }}
+    >
+      Loading recipes...
+    </p>
+  );
+} else if (query && filteredRecipes.length === 0) {
+  content = (
+    <p
+      style={{
+        color: "yellow",
+        fontSize: "1.2rem",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        height: "60vh",
+        textAlign: "center",
+      }}
+    >
+      Sorry, this recipe is not in our dataset!
+    </p>
+  );
+}
+ else {
     content = (
       <div className="recipes-container">
         {filteredRecipes.map((recipe) => (
@@ -148,7 +173,6 @@ const AllRecipes = ({ searchTerm }) => {
   return (
     <>
       <section className="recipes" id="recipes">
-        <h1>All Recipes</h1>
         {content}
       </section>
 
