@@ -39,15 +39,16 @@ const AllRecipes = ({ searchTerm }) => {
   const [likedIds, setLikedIds] = useState([]);
   const [modalRecipe, setModalRecipe] = useState(null);
   const [rating, setRating] = useState({});
-useEffect(() => {
-  const handleStorageChange = () => {
-    const likes = JSON.parse(localStorage.getItem("likedRecipes") || "[]");
-    setLikedIds(likes.map((item) => item.idMeal));
-  };
 
-  window.addEventListener("storage", handleStorageChange);
-  return () => window.removeEventListener("storage", handleStorageChange);
-}, []);
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const likes = JSON.parse(localStorage.getItem("likedRecipes") || "[]");
+      setLikedIds(likes.map((item) => item.idMeal));
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
 
   useEffect(() => {
     const getRecipes = async () => {
@@ -82,6 +83,11 @@ useEffect(() => {
 
   const handleView = async (id) => {
     const recipeDetails = await fetchRecipeById(id);
+
+    // Dummy servings and cooking time (for assignment purpose)
+    recipeDetails.servings = "2-3";
+    recipeDetails.time = "30 mins";
+
     setModalRecipe(recipeDetails);
   };
 
@@ -126,54 +132,55 @@ useEffect(() => {
       </section>
 
       {modalRecipe && (
-  <div className="modal">
-    <div className="modal-content">
-      <span className="close" onClick={() => setModalRecipe(null)}>&times;</span>
-      <h2 className="modal-heading">{modalRecipe.strMeal}</h2>
-      <img src={modalRecipe.strMealThumb} alt={modalRecipe.strMeal} className="modal-img"/>
-      
-      <p><strong>Category:</strong> <span className="modal-text">{modalRecipe.strCategory}</span></p>
-      
-      <p><strong>Ingredients:</strong></p>
-      <ul className="modal-text">
-        {Array.from({ length: 20 }, (_, i) => i + 1)
-          .map((n) => {
-            const ingredient = modalRecipe[`strIngredient${n}`];
-            const measure = modalRecipe[`strMeasure${n}`];
-            if (ingredient && ingredient.trim() !== "") {
-              return <li key={n}>{measure} {ingredient}</li>;
-            }
-            return null;
-          })}
-      </ul>
-      
-      <p><strong>Instructions:</strong></p>
-      <ul className="modal-text">
-        {modalRecipe.strInstructions
-          ? modalRecipe.strInstructions.split('. ').map((inst, idx) => inst.trim() && <li key={idx}>{inst}.</li>)
-          : <li>Not available</li>}
-      </ul>
+        <div className="modal">
+          <div className="modal-content">
+            <span className="close" onClick={() => setModalRecipe(null)}>&times;</span>
+            <h2 className="modal-heading">{modalRecipe.strMeal}</h2>
+            <img src={modalRecipe.strMealThumb} alt={modalRecipe.strMeal} className="modal-img" />
 
-      {modalRecipe.strYoutube && (
-        <a href={modalRecipe.strYoutube} target="_blank" rel="noreferrer" className="youtube-link">
-          <i className="fab fa-youtube"></i> Watch on YouTube
-        </a>
+            <p><strong>Category:</strong> <span className="modal-text">{modalRecipe.strCategory}</span></p>
+            <p><strong>Servings:</strong> {modalRecipe.servings}</p>
+            <p><strong>Cooking Time:</strong> {modalRecipe.time}</p>
+
+            <p><strong>Ingredients:</strong></p>
+            <ul className="modal-text">
+              {Array.from({ length: 20 }, (_, i) => i + 1)
+                .map((n) => {
+                  const ingredient = modalRecipe[`strIngredient${n}`];
+                  const measure = modalRecipe[`strMeasure${n}`];
+                  if (ingredient && ingredient.trim() !== "") {
+                    return <li key={n}>{measure} {ingredient}</li>;
+                  }
+                  return null;
+                })}
+            </ul>
+
+            <p><strong>Instructions:</strong></p>
+            <ul className="modal-text">
+              {modalRecipe.strInstructions
+                ? modalRecipe.strInstructions.split('. ').map((inst, idx) => inst.trim() && <li key={idx}>{inst}.</li>)
+                : <li>Not available</li>}
+            </ul>
+
+            {modalRecipe.strYoutube && (
+              <a href={modalRecipe.strYoutube} target="_blank" rel="noreferrer" className="youtube-link">
+                <i className="fab fa-youtube"></i> Watch on YouTube
+              </a>
+            )}
+
+            <div style={{ marginTop: "10px" }}>
+              <strong>Rate this recipe: </strong>
+              {[1, 2, 3, 4, 5].map((star) => (
+                <span
+                  key={star}
+                  onClick={() => handleRating(modalRecipe.idMeal, star)}
+                  style={{ cursor: "pointer", color: (rating[modalRecipe.idMeal] || 0) >= star ? "gold" : "gray", fontSize: "1.5rem" }}
+                >★</span>
+              ))}
+            </div>
+          </div>
+        </div>
       )}
-
-      <div style={{ marginTop: "10px" }}>
-        <strong>Rate this recipe: </strong>
-        {[1, 2, 3, 4, 5].map((star) => (
-          <span
-            key={star}
-            onClick={() => handleRating(modalRecipe.idMeal, star)}
-            style={{ cursor: "pointer", color: (rating[modalRecipe.idMeal] || 0) >= star ? "gold" : "gray", fontSize: "1.5rem" }}
-          >★</span>
-        ))}
-      </div>
-    </div>
-  </div>
-)}
-
     </>
   );
 };
