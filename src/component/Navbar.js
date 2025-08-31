@@ -1,11 +1,12 @@
 import React, { useRef, useState, useEffect } from "react";
 import Logo from "../images/logohome.jpg";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { fetchRecipeById, fetchAllRecipes } from "../api/recipes";
 import * as mobilenet from "@tensorflow-models/mobilenet";
 import "@tensorflow/tfjs";
 
 const Navbar = ({ setSearchTerm }) => {
+  const navigate = useNavigate();
   const searchRef = useRef();
   const navbarRef = useRef();
   const [input, setInput] = useState("");
@@ -44,7 +45,6 @@ const Navbar = ({ setSearchTerm }) => {
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
-  // ✅ Fix: ensure navbar closed on first render (especially mobile)
   useEffect(() => {
     if (navbarRef.current) {
       navbarRef.current.classList.remove("active");
@@ -64,6 +64,10 @@ const Navbar = ({ setSearchTerm }) => {
   const handleInputChange = (e) => {
     setInput(e.target.value);
     setSearchTerm(e.target.value);
+
+    if (e.target.value.trim() !== "") {
+      navigate("/recipes");
+    }
   };
 
   const handleView = async (id) => {
@@ -294,7 +298,7 @@ const Navbar = ({ setSearchTerm }) => {
 
             {modalRecipe.strYoutube && (
               <a href={modalRecipe.strYoutube} target="_blank" rel="noreferrer" style={{ color: "red", display: "block", marginTop: "10px" }}>
-                  ▶ Watch on YouTube
+                ▶ Watch on YouTube
               </a>
             )}
             <div style={{ marginTop: "10px" }}>
