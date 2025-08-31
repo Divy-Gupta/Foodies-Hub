@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import Logo from "../images/logohome.jpg";
 import { Link, useNavigate } from "react-router-dom";
-import { fetchRecipeById, fetchAllRecipes } from "../api/recipes";
+import { fetchAllRecipes } from "../api/recipes";
 import * as mobilenet from "@tensorflow-models/mobilenet";
 import "@tensorflow/tfjs";
 
@@ -12,13 +12,11 @@ const Navbar = ({ setSearchTerm }) => {
   const [input, setInput] = useState("");
   const [likedRecipes, setLikedRecipes] = useState([]);
   const [showLikes, setShowLikes] = useState(false);
-  const [modalRecipe, setModalRecipe] = useState(null);
-  const [matchedRecipes, setMatchedRecipes] = useState([]);
-  const [rating, setRating] = useState({});
   const [notification, setNotification] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [allRecipes, setAllRecipes] = useState([]);
 
+  // Load all recipes once
   useEffect(() => {
     const loadRecipes = async () => {
       const recipes = await fetchAllRecipes();
@@ -27,79 +25,57 @@ const Navbar = ({ setSearchTerm }) => {
     loadRecipes();
   }, []);
 
+  // Load likes and ratings from localStorage
   useEffect(() => {
     const likes = JSON.parse(localStorage.getItem("likedRecipes") || "[]");
     setLikedRecipes(likes);
-    const savedRatings = JSON.parse(localStorage.getItem("recipeRatings") || "{}");
-    setRating(savedRatings);
   }, []);
 
+  // Handle storage changes
   useEffect(() => {
     const handleStorageChange = () => {
       const likes = JSON.parse(localStorage.getItem("likedRecipes") || "[]");
       setLikedRecipes(likes);
-      const savedRatings = JSON.parse(localStorage.getItem("recipeRatings") || "{}");
-      setRating(savedRatings);
     };
     window.addEventListener("storage", handleStorageChange);
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
+  // Toggle search form
   const searchHandler = () => {
     searchRef.current.classList.toggle("active");
     navbarRef.current.classList.remove("active");
   };
 
+  // Toggle mobile navbar
   const navbarHandler = () => {
     navbarRef.current.classList.toggle("active");
     searchRef.current.classList.remove("active");
   };
 
-  // Close mobile navbar when a link is clicked
+  // Close navbar on link click
   const handleNavLinkClick = () => {
     if (navbarRef.current.classList.contains("active")) {
       navbarRef.current.classList.remove("active");
     }
   };
 
+  // Handle search input change
   const handleInputChange = (e) => {
     setInput(e.target.value);
     setSearchTerm(e.target.value);
-
     if (e.target.value.trim() !== "") {
       navigate("/recipes");
     }
   };
 
-  const handleView = async (id) => {
-    const recipeDetails = await fetchRecipeById(id);
-    setModalRecipe(recipeDetails);
-  };
-
-  const handleRating = (idMeal, value) => {
-    const updatedRating = { ...rating, [idMeal]: value };
-    setRating(updatedRating);
-    localStorage.setItem("recipeRatings", JSON.stringify(updatedRating));
-    window.dispatchEvent(new Event("storage"));
-  };
-
-  const handleSaveRecipe = (recipe) => {
-    let updatedLikes = [...likedRecipes];
-    const exists = likedRecipes.some((r) => r.idMeal === recipe.idMeal);
-    if (!exists) updatedLikes.push(recipe);
-    else updatedLikes = updatedLikes.filter((r) => r.idMeal !== recipe.idMeal);
-    localStorage.setItem("likedRecipes", JSON.stringify(updatedLikes));
-    setLikedRecipes(updatedLikes);
-    window.dispatchEvent(new Event("storage"));
-  };
-
+  // Handle image upload for ingredient detection
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     setNotification("Processing image, please wait...");
     setIsProcessing(true);
-    setMatchedRecipes([]);
 
     const img = new Image();
     img.src = URL.createObjectURL(file);
@@ -117,16 +93,8 @@ const Navbar = ({ setSearchTerm }) => {
           detectedIngredients.some((det) => recipe.strMeal.toLowerCase().includes(det))
         );
 
-        const matchedWithDetails = await Promise.all(
-          matched.map(async (recipe) => {
-            const details = await fetchRecipeById(recipe.idMeal);
-            return details ? details : recipe;
-          })
-        );
-
-        if (matchedWithDetails.length > 0) {
-          setMatchedRecipes(matchedWithDetails);
-          setNotification(`Found ${matchedWithDetails.length} recipe(s)!`);
+        if (matched.length > 0) {
+          setNotification(`Found ${matched.length} recipe(s)!`);
         } else {
           setNotification("Sorry, no recipe found for this ingredient.");
         }
@@ -150,7 +118,7 @@ const Navbar = ({ setSearchTerm }) => {
       <nav className="navbar" ref={navbarRef}>
         <Link to="/" onClick={handleNavLinkClick}>Home</Link>
         <Link to="/recipes" onClick={handleNavLinkClick}>All Recipes</Link>
-        <Link to="/about" onClick={handleNavLinkClick}>About US</Link>
+        <Link to="/about" onClick={handleNavLinkClick}>About Us</Link>
       </nav>
 
       {/* Icons */}
