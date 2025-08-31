@@ -52,13 +52,16 @@ FoodiesHub/
    npm install
 
    npm start
-
-📌 Future Improvements
+   
+---
+## 📌 Future Improvements
 Add cooking time & servings for each recipe
 
 Add authentication (login/signup)
 
 Enable backend integration for user accounts
 
-👨‍💻 Author
+---
+
+## 👨‍💻 Author
 Divy Gupta
