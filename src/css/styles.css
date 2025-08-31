@@ -15,17 +15,34 @@
 html, body {
   height: 100%;
   margin: 0;
-  background-color: rgb(0, 0, 0);  /* Set body background to black */
   overflow-x: hidden;
 }
 
 /* Default Navbar (Desktop) */
+/* Navbar for mobile */
 .navbar {
-  display: flex; /* ✅ desktop me visible */
-  flex-direction: row;
-  position: static;
-  background: none;
+  display: flex;
+  gap: 20px;
 }
+
+@media (max-width: 768px) {
+  .navbar {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: black;
+    flex-direction: column;
+    width: 200px;
+    transform: translateX(100%);
+    transition: 0.3s ease;
+    display: block;
+  }
+
+  .navbar.active {
+    transform: translateX(0);
+  }
+}
+
 
 /* Header */
 .header {
@@ -33,7 +50,7 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 7%;
+  padding: 10px 7%;
   border-bottom: 0.2rem solid yellow;
   position: fixed;
   top: 0;
@@ -94,7 +111,7 @@ html, body {
     background: #000;
     width: 100%;
     text-align: center;
-    padding: 1rem 0;
+    padding: 2rem 0;
     border-top: 1px solid yellow;
   }
 
@@ -155,33 +172,145 @@ html, body {
 
 /* Home Section */
 .home {
+  position: relative;
   min-height: 100vh;
   display: flex;
   align-items: center;
-  background: url('../images/homepage.png') no-repeat;
-  background-size: cover;
-  background-position: center;
+  justify-content: center; /* center horizontally */
+  overflow: hidden;
+  padding-left: 3rem;
 }
 
+.bg-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -1;
+  filter: brightness(0.6); /* dims video for readability */
+}
+
+/* Content */
 .home .content {
+  position: relative;
   max-width: 60rem;
-  margin-left: 3rem;
+  color: white;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(30px);
+  animation: fadeInUp 1s forwards;
+  animation-delay: 0.5s;
 }
 
-h1 span {
+/* Typewriter effect for heading */
+.home .content h1 span {
   color: yellow;
   font-family: 'Dancing Script', cursive;
   font-size: 3rem;
   text-transform: uppercase;
+  overflow: hidden;
+  white-space: nowrap;
+  animation: typing 3s steps(20, end), blink-caret 0.75s step-end infinite;
 }
 
+@keyframes typing {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+@keyframes blink-caret {
+  from, to { border-color: transparent; }
+  50% { border-color: orange; }
+}
+
+/* Paragraph styling */
 .home .content p {
   font-size: 1.2rem;
   margin-top: 20px;
   text-transform: uppercase;
   font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-  color: white;
 }
+
+/* Fade-in animation */
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Buttons container */
+.home-buttons {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center; /* center buttons */
+}
+
+/* Buttons styling */
+.home-buttons button {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 50px;
+  background: linear-gradient(90deg, #ffd700, #ffa500);
+  cursor: pointer;
+  font-weight: bold;
+  color: black;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  width: auto;
+  min-width: 150px;
+}
+
+.home-buttons button:hover {
+  transform: scale(1.1) rotate(-1deg);
+  background: linear-gradient(90deg, #ffa500, #ff4500);
+  color: white;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .bg-video {
+    object-position: 25% top;
+    height: auto;
+    min-height: 100vh; /* ensure video fills screen */
+  }
+
+  .home .content {
+    max-width: 95%;  /* full width for small screens */
+    padding: 1rem;
+    text-align: center; /* center content */
+    top: 50%;
+    transform: translateY(0); /* remove extra translate for small screens */
+  }
+
+  h1 span {
+    font-size: 2rem; /* smaller heading */
+  }
+
+  .home .content p {
+    font-size: 1rem;
+  }
+
+  .home-buttons {
+    width: 100%;
+    gap: 8px;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .home-buttons button {
+    min-width: 120px;
+    font-size: 0.9rem;
+    padding: 10px 15px;
+  }
+}
+
 
 /* About Section */
 .about {
@@ -189,27 +318,41 @@ h1 span {
   background-color: #000;
   color: #ffe0e0;
   text-align: center;
-  height: 100vh;
+  min-height: 100vh;
   font-family: 'Roboto', sans-serif;
+  opacity: 0;
+  transform: translateY(50px);
+  animation: fadeUp 1s forwards;
 }
 
+/* Heading Animation */
 .about h1 {
   color: #ff6600;
   font-size: 2.5rem;
   margin-bottom: 20px;
-  font-family: cursive;
+  font-family: 'Dancing Script', cursive;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: slideIn 1s forwards;
+  animation-delay: 0.3s;
 }
 
+/* Paragraph Animation */
 .about p {
   font-size: 1.1rem;
   line-height: 1.8;
   margin: 15px 0;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: slideIn 1s forwards;
+  animation-delay: 0.5s;
 }
 
 .about p strong {
   color: #ff4500;
 }
 
+/* List Animation */
 .about ul {
   list-style: circle inside;
   margin: 15px 0;
@@ -219,8 +362,33 @@ h1 span {
 .about ul li {
   margin: 8px 0;
   font-size: 1.05rem;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: slideIn 0.8s forwards;
 }
 
+.about ul li:nth-child(1) { animation-delay: 0.6s; }
+.about ul li:nth-child(2) { animation-delay: 0.7s; }
+.about ul li:nth-child(3) { animation-delay: 0.8s; }
+.about ul li:nth-child(4) { animation-delay: 0.9s; }
+.about ul li:nth-child(5) { animation-delay: 1s; }
+
+/* Keyframes */
+@keyframes fadeUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
 @media screen and (max-width: 768px) {
   .about h1 {
     font-size: 2rem;
@@ -231,41 +399,66 @@ h1 span {
   }
 }
 
+
 /* Recipes Grid */
+
+.recipes {
+  background-color: #000;
+  padding: 4rem 2rem;
+  min-height: 100vh;
+  color: white;
+}
 .recipes-container {
   display: flex;
   flex-wrap: wrap;
-  margin: 40px;
-  gap: 12px;
+  justify-content: center;
+  gap: 2rem;
+  padding: 3rem 0;
 }
 
 .recipe-card {
+  background: #1a1a1a;
+  color: white;
+  border-radius: 15px;
+  overflow: hidden;
   width: 250px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 10px;
-  text-align: center;
-  background: #050505;
-  color: #fff;
+  box-shadow: 0 5px 15px red;
+  transform: translateY(50px);
+  opacity: 0;
+  animation: fadeUp 0.6s forwards;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.recipe-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(72, 230, 5, 0.5);
 }
 
 .recipe-card img {
   width: 100%;
-  height: 150px;
+  height: 200px;
   object-fit: cover;
-  border-radius: 6px;
 }
 
 .recipe-card h3 {
-  font-size: small;
-  color: rgb(255, 255, 255);
-  margin: 10px 0 5px;
+  text-align: center;
+  margin: 0.5rem 0;
+  font-size: 1.1rem;
 }
 
-.recipe-card p {
-  font-size: 1rem;
-  color: #918d8d;
+@keyframes fadeUp {
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
+
+/* Optional: stagger animation with delay for each card */
+.recipe-card:nth-child(1) { animation-delay: 0s; }
+.recipe-card:nth-child(2) { animation-delay: 0.1s; }
+.recipe-card:nth-child(3) { animation-delay: 0.2s; }
+.recipe-card:nth-child(4) { animation-delay: 0.3s; }
+
 
 /* Notification */
 .notification {
