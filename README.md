@@ -26,21 +26,6 @@ It allows users to browse recipes, search by ingredients, upload food images for
 - **Deployment:** Vercel
 
 ---
-## 📂 Project Structure
-
-FoodiesHub/
-│── public/ # Static files
-│── src/
-│ ├── api/ # API calls (TheMealDB)
-│ ├── components/ # Navbar, Cards, Modals, etc.
-│ ├── images/ # Logo & assets
-│ ├── pages/ # Home, About, All Recipes
-│ └── App.js # Main app component
-│── package.json # Dependencies & scripts
-│── README.md # Documentation
-
-
----
 
 ## ⚡ Getting Started
 
