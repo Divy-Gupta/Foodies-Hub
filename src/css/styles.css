@@ -19,6 +19,24 @@ html, body {
   overflow-x: hidden;
 }
 
+/* Navbar hidden by default (mobile) */
+.navbar {
+  display: none;
+  flex-direction: column;
+  position: absolute;
+  top: 60px;
+  right: 10px;
+  background: black;
+  padding: 10px;
+  border-radius: 8px;
+  z-index: 999;
+}
+
+/* Show when active */
+.navbar.active {
+  display: flex;
+}
+
 /* Header */
 .header {
   background-color: rgb(0, 0, 0);
@@ -74,23 +92,37 @@ html, body {
   #menu-button {
     display: inline-block;
   }
+
   .header .navbar {
+    display: none; /* By default hidden */
+    flex-direction: column;
     position: absolute;
-    top: 100%;
-    right: -100%;
-    background: #000;
-    width: 30rem;
-    height: calc(100vh - 9.5rem);
-  }
-  .header .navbar.active {
+    top: 100%; /* Just below header */
     right: 0;
+    background: #000;
+    width: 100%; /* Full width */
+    text-align: center;
+    padding: 1rem 0;
+    border-top: 1px solid yellow;
   }
+
+  .header .navbar.active {
+    display: flex; /* Show when active */
+  }
+
   .header .navbar a {
-    color: #fff;
     display: block;
-    margin: 1.5rem;
+    margin: 1rem 0;
+    font-size: 1.2rem;
+    color: white;
+  }
+
+  .header .navbar a:hover {
+    color: yellow;
+    border: none;
   }
 }
+
 
 .header .search-form {
   position: absolute;
