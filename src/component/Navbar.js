@@ -44,6 +44,13 @@ const Navbar = ({ setSearchTerm }) => {
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
+  // ✅ Fix: ensure navbar closed on first render (especially mobile)
+  useEffect(() => {
+    if (navbarRef.current) {
+      navbarRef.current.classList.remove("active");
+    }
+  }, []);
+
   const searchHandler = () => {
     searchRef.current.classList.toggle("active");
     navbarRef.current.classList.remove("active");
@@ -287,7 +294,7 @@ const Navbar = ({ setSearchTerm }) => {
 
             {modalRecipe.strYoutube && (
               <a href={modalRecipe.strYoutube} target="_blank" rel="noreferrer" style={{ color: "red", display: "block", marginTop: "10px" }}>
-                ▶ Watch on YouTube
+                  ▶ Watch on YouTube
               </a>
             )}
             <div style={{ marginTop: "10px" }}>
