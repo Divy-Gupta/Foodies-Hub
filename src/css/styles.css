@@ -19,22 +19,12 @@ html, body {
   overflow-x: hidden;
 }
 
-/* Navbar hidden by default (mobile) */
+/* Default Navbar (Desktop) */
 .navbar {
-  display: none;
-  flex-direction: column;
-  position: absolute;
-  top: 60px;
-  right: 10px;
-  background: black;
-  padding: 10px;
-  border-radius: 8px;
-  z-index: 999;
-}
-
-/* Show when active */
-.navbar.active {
-  display: flex;
+  display: flex; /* ✅ desktop me visible */
+  flex-direction: row;
+  position: static;
+  background: none;
 }
 
 /* Header */
@@ -45,11 +35,11 @@ html, body {
   justify-content: space-between;
   padding: 8px 7%;
   border-bottom: 0.2rem solid yellow;
-  position: fixed;  /* Keep navbar fixed at the top */
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  z-index: 1000;  /* Keep navbar above other content */
+  z-index: 1000;
 }
 
 .header .logo img {
@@ -84,30 +74,32 @@ html, body {
   color: red;
 }
 
+/* Hide menu button in desktop */
 #menu-button {
   display: none;
 }
 
+/* ✅ Mobile View */
 @media (max-width: 768px) {
   #menu-button {
-    display: inline-block;
+    display: inline-block; /* sirf mobile me bars dikhega */
   }
 
   .header .navbar {
-    display: none; /* By default hidden */
+    display: none; /* by default hidden */
     flex-direction: column;
     position: absolute;
-    top: 100%; /* Just below header */
+    top: 100%;
     right: 0;
     background: #000;
-    width: 100%; /* Full width */
+    width: 100%;
     text-align: center;
     padding: 1rem 0;
     border-top: 1px solid yellow;
   }
 
   .header .navbar.active {
-    display: flex; /* Show when active */
+    display: flex; /* click pe show hoga */
   }
 
   .header .navbar a {
@@ -123,7 +115,7 @@ html, body {
   }
 }
 
-
+/* Search box */
 .header .search-form {
   position: absolute;
   top: 115%;
@@ -191,8 +183,7 @@ h1 span {
   color: white;
 }
 
-/* About.css */
-
+/* About Section */
 .about {
   padding: 60px 20px;
   background-color: #000;
@@ -206,7 +197,6 @@ h1 span {
   color: #ff6600;
   font-size: 2.5rem;
   margin-bottom: 20px;
-
   font-family: cursive;
 }
 
@@ -241,8 +231,7 @@ h1 span {
   }
 }
 
-
-
+/* Recipes Grid */
 .recipes-container {
   display: flex;
   flex-wrap: wrap;
@@ -277,6 +266,8 @@ h1 span {
   font-size: 1rem;
   color: #918d8d;
 }
+
+/* Notification */
 .notification {
   position: fixed;
   top: 80px;
@@ -290,7 +281,7 @@ h1 span {
   box-shadow: 0 0 10px rgba(0,0,0,0.5);
 }
 
-
+/* View button */
 .view-btn {
   background-color: yellow;
   color: black;
@@ -358,13 +349,15 @@ h1 span {
   color: white;
   line-height: 1.5rem;
 }
-.modal strong{
+
+.modal strong {
   display: grid;
   justify-content: center;
   color: rgb(10, 209, 70);
   font-size: 1.3rem;
   margin: 15px;
 }
+
 .youtube-link {
   display: inline-block;
   margin-top: 10px;
@@ -376,4 +369,3 @@ h1 span {
 .youtube-link i {
   margin-right: 5px;
 }
-
