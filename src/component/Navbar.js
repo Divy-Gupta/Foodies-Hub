@@ -45,12 +45,6 @@ const Navbar = ({ setSearchTerm }) => {
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
-  useEffect(() => {
-    if (navbarRef.current) {
-      navbarRef.current.classList.remove("active");
-    }
-  }, []);
-
   const searchHandler = () => {
     searchRef.current.classList.toggle("active");
     navbarRef.current.classList.remove("active");
@@ -59,6 +53,13 @@ const Navbar = ({ setSearchTerm }) => {
   const navbarHandler = () => {
     navbarRef.current.classList.toggle("active");
     searchRef.current.classList.remove("active");
+  };
+
+  // Close mobile navbar when a link is clicked
+  const handleNavLinkClick = () => {
+    if (navbarRef.current.classList.contains("active")) {
+      navbarRef.current.classList.remove("active");
+    }
   };
 
   const handleInputChange = (e) => {
@@ -84,9 +85,9 @@ const Navbar = ({ setSearchTerm }) => {
 
   const handleSaveRecipe = (recipe) => {
     let updatedLikes = [...likedRecipes];
-    const exists = likedRecipes.some(r => r.idMeal === recipe.idMeal);
+    const exists = likedRecipes.some((r) => r.idMeal === recipe.idMeal);
     if (!exists) updatedLikes.push(recipe);
-    else updatedLikes = updatedLikes.filter(r => r.idMeal !== recipe.idMeal);
+    else updatedLikes = updatedLikes.filter((r) => r.idMeal !== recipe.idMeal);
     localStorage.setItem("likedRecipes", JSON.stringify(updatedLikes));
     setLikedRecipes(updatedLikes);
     window.dispatchEvent(new Event("storage"));
@@ -110,10 +111,10 @@ const Navbar = ({ setSearchTerm }) => {
       try {
         const model = await mobilenet.load({ version: 2, alpha: 1.0 });
         const predictions = await model.classify(img);
-        const detectedIngredients = predictions.map(p => p.className.toLowerCase());
+        const detectedIngredients = predictions.map((p) => p.className.toLowerCase());
 
-        const matched = allRecipes.filter(recipe =>
-          detectedIngredients.some(det => recipe.strMeal.toLowerCase().includes(det))
+        const matched = allRecipes.filter((recipe) =>
+          detectedIngredients.some((det) => recipe.strMeal.toLowerCase().includes(det))
         );
 
         const matchedWithDetails = await Promise.all(
@@ -145,12 +146,14 @@ const Navbar = ({ setSearchTerm }) => {
         <img src={Logo} alt="Logo" />
       </Link>
 
+      {/* Navbar */}
       <nav className="navbar" ref={navbarRef}>
-        <Link to="/">Home</Link>
-        <Link to="/recipes">All Recipes</Link>
-        <Link to="/about">About US</Link>
+        <Link to="/" onClick={handleNavLinkClick}>Home</Link>
+        <Link to="/recipes" onClick={handleNavLinkClick}>All Recipes</Link>
+        <Link to="/about" onClick={handleNavLinkClick}>About US</Link>
       </nav>
 
+      {/* Icons */}
       <div className="icons">
         <div className="fas fa-search" id="search-btn" onClick={searchHandler}></div>
         <div
@@ -176,7 +179,10 @@ const Navbar = ({ setSearchTerm }) => {
             color: likedRecipes.length > 0 ? "red" : "white",
             marginLeft: "10px",
           }}
-          onClick={() => setShowLikes(!showLikes)}
+          onClick={() => {
+            if (likedRecipes.length === 0) alert("Please save a recipe first!");
+            else setShowLikes(!showLikes);
+          }}
         >
           {likedRecipes.length > 0 && (
             <span
@@ -198,6 +204,7 @@ const Navbar = ({ setSearchTerm }) => {
         <div className="fas fa-bars" id="menu-button" onClick={navbarHandler} style={{ marginLeft: "10px" }}></div>
       </div>
 
+      {/* Search form */}
       <div className="search-form" ref={searchRef}>
         <input
           type="search"
@@ -209,115 +216,47 @@ const Navbar = ({ setSearchTerm }) => {
         <label htmlFor="search-box" className="fas fa-search"></label>
       </div>
 
-      {/* Liked Recipes Modal */}
-      {showLikes && likedRecipes.length > 0 && (
-        <div className="modal" style={{ zIndex: 1000 }}>
-          <div className="modal-content" style={{ background: "black", color: "white" }}>
-            <span className="close" onClick={() => setShowLikes(false)}>&times;</span>
-            <h2 style={{ color: "yellow" }}>Saved Recipes</h2>
-            <ul style={{ listStyle: "none", padding: 0 }}>
-              {likedRecipes.map((recipe) => (
-                <li key={recipe.idMeal} style={{ marginBottom: "15px", borderBottom: "1px solid gray", paddingBottom: "10px" }}>
-                  <h3 style={{ color: "orange" }}>{recipe.strMeal}</h3>
-                  {recipe.strMealThumb && <img src={recipe.strMealThumb} alt={recipe.strMeal} style={{ width: "50%", marginBottom: "10px" }} />}
-                  <div>
-                    <button
-                      style={{ padding: "5px 10px", cursor: "pointer", background: "red", color: "white", border: "none", borderRadius: "5px" }}
-                      onClick={() => handleSaveRecipe(recipe)}
-                    >
-                      Remove
-                    </button>
-                    <button
-                      style={{ padding: "5px 10px", cursor: "pointer", background: "yellow", color: "black", border: "none", borderRadius: "5px", marginLeft: "10px" }}
-                      onClick={() => handleView(recipe.idMeal)}
-                    >
-                      View
-                    </button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      )}
-
-      {/* Matched Recipes Modal */}
-      {matchedRecipes.length > 0 && (
-        <div className="modal" style={{ zIndex: 1000 }}>
-          <div className="modal-content" style={{ background: "black", color: "white" }}>
-            <span className="close" onClick={() => setMatchedRecipes([])}>&times;</span>
-            <h2 style={{ color: "yellow" }}>Detected Recipes</h2>
-            <ul style={{ listStyle: "none", padding: 0 }}>
-              {matchedRecipes.map((recipe) => {
-                const isLiked = likedRecipes.some(r => r.idMeal === recipe.idMeal);
-                return (
-                  <li key={recipe.idMeal} style={{ marginBottom: "15px", borderBottom: "1px solid gray", paddingBottom: "10px" }}>
-                    <h3 style={{ color: "orange" }}>{recipe.strMeal}</h3>
-                    {recipe.strMealThumb && <img src={recipe.strMealThumb} alt={recipe.strMeal} style={{ width: "50%", marginBottom: "10px" }} />}
-                    <div>
-                      <button
-                        style={{ padding: "5px 10px", cursor: "pointer", background: isLiked ? "red" : "green", color: "white", border: "none", borderRadius: "5px", marginRight: "10px" }}
-                        onClick={() => handleSaveRecipe(recipe)}
-                      >
-                        {isLiked ? "Saved ❤️" : "Save"}
-                      </button>
-                      <button
-                        style={{ padding: "5px 10px", cursor: "pointer", background: "yellow", color: "black", border: "none", borderRadius: "5px" }}
-                        onClick={() => handleView(recipe.idMeal)}
-                      >
-                        View
-                      </button>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        </div>
-      )}
-
-      {/* Recipe Details Modal */}
-      {modalRecipe && (
-        <div className="modal" style={{ zIndex: 2000 }}>
-          <div className="modal-content" style={{ background: "black", color: "white" }}>
-            <span className="close" onClick={() => setModalRecipe(null)}>&times;</span>
-            <h2 style={{ color: "yellow" }}>{modalRecipe.strMeal}</h2>
-            <img src={modalRecipe.strMealThumb} alt={modalRecipe.strMeal} style={{ width: "50%", marginBottom: "10px" }} />
-
-            <p><strong>Ingredients:</strong></p>
-            <ul>
-              {Array.from({ length: 20 }).map((_, i) => {
-                const ing = modalRecipe[`strIngredient${i + 1}`];
-                const measure = modalRecipe[`strMeasure${i + 1}`];
-                return ing ? <li key={i}>{ing} - {measure}</li> : null;
-              })}
-            </ul>
-
-            <p><strong>Instructions:</strong></p>
-            <ul>{modalRecipe.strInstructions?.split(". ").map((inst, idx) => <li key={idx}>{inst}.</li>)}</ul>
-
-            {modalRecipe.strYoutube && (
-              <a href={modalRecipe.strYoutube} target="_blank" rel="noreferrer" style={{ color: "red", display: "block", marginTop: "10px" }}>
-                ▶ Watch on YouTube
-              </a>
-            )}
-            <div style={{ marginTop: "10px" }}>
-              <strong>Rate this recipe: </strong>
-              {[1, 2, 3, 4, 5].map((star) => (
-                <span key={star} onClick={() => handleRating(modalRecipe.idMeal, star)} style={{ cursor: "pointer", color: (rating[modalRecipe.idMeal] || 0) >= star ? "gold" : "gray", fontSize: "1.5rem" }}>
-                  ★
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Notifications */}
-      {notification && <div className="notification" style={{ position: "fixed", top: "20px", right: "20px", background: "black", color: "white", padding: "10px 15px", borderRadius: "8px", zIndex: 3000 }}>{notification}</div>}
+      {notification && (
+        <div
+          className="notification"
+          style={{
+            position: "fixed",
+            top: "20px",
+            right: "20px",
+            background: "black",
+            color: "white",
+            padding: "10px 15px",
+            borderRadius: "8px",
+            zIndex: 3000,
+          }}
+        >
+          {notification}
+        </div>
+      )}
 
-      {/* Processing Spinner */}
-      {isProcessing && <div style={{ position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 4000, color: "white", fontSize: "1.5rem", fontWeight: "bold" }}>Processing Image...</div>}
+      {/* Processing spinner */}
+      {isProcessing && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            background: "rgba(0,0,0,0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 4000,
+            color: "white",
+            fontSize: "1.5rem",
+            fontWeight: "bold",
+          }}
+        >
+          Processing Image...
+        </div>
+      )}
     </header>
   );
 };
