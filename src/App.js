@@ -8,13 +8,25 @@ import './css/styles.css';
 
 function App() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [matchedRecipes, setMatchedRecipes] = useState([]); // 👈 add this
 
   return (
     <Router>
-      <Navbar setSearchTerm={setSearchTerm} />
+      <Navbar
+        setSearchTerm={setSearchTerm}
+        setMatchedRecipes={setMatchedRecipes} // 👈 pass setter
+      />
       <Routes>
         <Route path='/' element={<Home />} />
-        <Route path='/recipes' element={<AllRecipes searchTerm={searchTerm} />} />
+        <Route
+          path='/recipes'
+          element={
+            <AllRecipes
+              searchTerm={searchTerm}
+              matchedRecipes={matchedRecipes} // 👈 pass matched recipes
+            />
+          }
+        />
         <Route path='/about' element={<About />} />
       </Routes>
     </Router>
