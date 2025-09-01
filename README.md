@@ -6,6 +6,9 @@ It allows users to browse recipes, search by ingredients, upload food images for
 🌐 Live Demo: [FoodiesHub on Vercel](https://foodies-hub-hg6v.vercel.app/)  
 📦 Repository: [GitHub Repo](https://github.com/Divy-Gupta/Foodies-Hub)  
 
+<img src="banner1.png" alt="FoodiesHub Banner" width="900" height="900">
+
+
 ---
 
 ## ✨ Features
