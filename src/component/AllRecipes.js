@@ -1,3 +1,4 @@
+// src/component/AllRecipes.js
 import React, { useEffect, useState } from "react";
 
 // Fetch all recipes from MealDB
@@ -33,12 +34,14 @@ export const fetchRecipeById = async (id) => {
   }
 };
 
-const AllRecipes = ({ searchTerm }) => {
+const AllRecipes = ({ searchTerm = "", matchedRecipes = [] }) => {
   const [recipes, setRecipes] = useState([]);
+  const [displayRecipes, setDisplayRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [likedIds, setLikedIds] = useState([]);
   const [modalRecipe, setModalRecipe] = useState(null);
   const [rating, setRating] = useState({});
+  const [showFiltered, setShowFiltered] = useState(false);
 
   // Sync likes from localStorage
   useEffect(() => {
@@ -55,6 +58,7 @@ const AllRecipes = ({ searchTerm }) => {
     const getRecipes = async () => {
       const data = await fetchAllRecipes();
       setRecipes(data);
+      setDisplayRecipes(data);
       setLoading(false);
 
       const likes = JSON.parse(localStorage.getItem("likedRecipes") || "[]");
@@ -65,6 +69,23 @@ const AllRecipes = ({ searchTerm }) => {
     };
     getRecipes();
   }, []);
+
+  // Update displayRecipes when searchTerm or matchedRecipes changes
+  useEffect(() => {
+    if (matchedRecipes.length > 0) {
+      setDisplayRecipes(matchedRecipes);
+      setShowFiltered(true);
+    } else if (searchTerm.trim()) {
+      const query = searchTerm.trim().toLowerCase();
+      setDisplayRecipes(
+        recipes.filter((recipe) => (recipe.strMeal || "").toLowerCase().includes(query))
+      );
+      setShowFiltered(true);
+    } else {
+      setDisplayRecipes(recipes);
+      setShowFiltered(false);
+    }
+  }, [matchedRecipes, searchTerm, recipes]);
 
   // Like/Unlike recipe
   const toggleLike = (recipe) => {
@@ -78,7 +99,7 @@ const AllRecipes = ({ searchTerm }) => {
     }
 
     localStorage.setItem("likedRecipes", JSON.stringify(liked));
-    window.dispatchEvent(new Event("storage")); // sync with navbar if needed
+    window.dispatchEvent(new Event("storage"));
     setLikedIds(liked.map((item) => item.idMeal));
     alert(exists ? "Recipe removed from saved!" : "Recipe saved!");
   };
@@ -100,73 +121,56 @@ const AllRecipes = ({ searchTerm }) => {
     localStorage.setItem("recipeRatings", JSON.stringify(updatedRating));
   };
 
-  // Search filter
-  const query = searchTerm.trim();
-  const filteredRecipes = query
-    ? recipes.filter((recipe) =>
-        (recipe.strMeal || "").toLowerCase().includes(query.toLowerCase())
-      )
-    : recipes;
-
   // Decide what to render
   let content;
   if (loading) {
-  content = (
-    <p
-      style={{
-        color: "yellow",
-        fontSize: "1.2rem",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "60vh", // centers vertically
-        textAlign: "center",
-      }}
-    >
-      Loading recipes...
-    </p>
-  );
-} else if (query && filteredRecipes.length === 0) {
-  content = (
-    <p
-      style={{
-        color: "yellow",
-        fontSize: "1.2rem",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "60vh",
-        textAlign: "center",
-      }}
-    >
-      Sorry, this recipe is not in our dataset!
-    </p>
-  );
-}
- else {
+    content = <p className="loading-text">Loading recipes...</p>;
+  } else if (displayRecipes.length === 0) {
     content = (
-      <div className="recipes-container">
-        {filteredRecipes.map((recipe) => (
-          <div key={recipe.idMeal} className="recipe-card">
-            <img src={recipe.strMealThumb} alt={recipe.strMeal} />
-            <h3>{recipe.strMeal}</h3>
-            <div style={{ display: "flex", justifyContent: "space-around", marginTop: "10px" }}>
-              <i
-                className="fas fa-heart"
-                style={{
-                  color: likedIds.includes(recipe.idMeal) ? "red" : "white",
-                  cursor: "pointer",
-                  fontSize: "1.5rem",
-                }}
-                onClick={() => toggleLike(recipe)}
-              ></i>
-              <button className="view-btn" onClick={() => handleView(recipe.idMeal)}>
-                View
-              </button>
+      <p className="error-text">
+        Sorry, no recipes found {searchTerm && `for "${searchTerm}"`}
+      </p>
+    );
+  } else {
+    content = (
+      <>
+        {showFiltered && (
+          <button
+            onClick={() => {
+              setDisplayRecipes(recipes); // reset to all
+              setShowFiltered(false);
+            }}
+            className="back-btn"
+          >
+            ✖ Back to All Recipes
+          </button>
+        )}
+        <div className="recipes-container">
+          {displayRecipes.map((recipe) => (
+            <div key={recipe.idMeal} className="recipe-card">
+              <img src={recipe.strMealThumb} alt={recipe.strMeal} />
+              <h3>{recipe.strMeal}</h3>
+              <div className="recipe-actions">
+                <i
+                  className="fas fa-heart"
+                  style={{
+                    color: likedIds.includes(recipe.idMeal) ? "red" : "white",
+                    cursor: "pointer",
+                    fontSize: "1.5rem",
+                  }}
+                  onClick={() => toggleLike(recipe)}
+                ></i>
+                <button
+                  className="view-btn"
+                  onClick={() => handleView(recipe.idMeal)}
+                >
+                  View
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      </>
     );
   }
 
@@ -178,16 +182,27 @@ const AllRecipes = ({ searchTerm }) => {
 
       {/* Modal */}
       {modalRecipe && (
-        <div className="modal">
+        <div
+          className="modal"
+          onClick={(e) => {
+            if (e.target.classList.contains("modal")) {
+              setModalRecipe(null); // close on clicking outside modal
+            }
+          }}
+        >
           <div className="modal-content">
             <span className="close" onClick={() => setModalRecipe(null)}>
               &times;
             </span>
             <h2 className="modal-heading">{modalRecipe.strMeal}</h2>
-            <img src={modalRecipe.strMealThumb} alt={modalRecipe.strMeal} className="modal-img" />
+            <img
+              src={modalRecipe.strMealThumb}
+              alt={modalRecipe.strMeal}
+              className="modal-img"
+            />
 
             <p>
-              <strong>Category:</strong> <span className="modal-text">{modalRecipe.strCategory}</span>
+              <strong>Category:</strong> {modalRecipe.strCategory}
             </p>
             <p>
               <strong>Servings:</strong> {modalRecipe.servings}
@@ -219,14 +234,22 @@ const AllRecipes = ({ searchTerm }) => {
             </p>
             <ul className="modal-text">
               {modalRecipe.strInstructions
-                ? modalRecipe.strInstructions.split(". ").map(
-                    (inst, idx) => inst.trim() && <li key={idx}>{inst}.</li>
-                  )
+                ? modalRecipe.strInstructions
+                    .split(". ")
+                    .map(
+                      (inst, idx) =>
+                        inst.trim() && <li key={idx}>{inst}.</li>
+                    )
                 : <li>Not available</li>}
             </ul>
 
             {modalRecipe.strYoutube && (
-              <a href={modalRecipe.strYoutube} target="_blank" rel="noreferrer" className="youtube-link">
+              <a
+                href={modalRecipe.strYoutube}
+                target="_blank"
+                rel="noreferrer"
+                className="youtube-link"
+              >
                 <i className="fab fa-youtube"></i> Watch on YouTube
               </a>
             )}
@@ -239,7 +262,10 @@ const AllRecipes = ({ searchTerm }) => {
                   onClick={() => handleRating(modalRecipe.idMeal, star)}
                   style={{
                     cursor: "pointer",
-                    color: (rating[modalRecipe.idMeal] || 0) >= star ? "gold" : "gray",
+                    color:
+                      (rating[modalRecipe.idMeal] || 0) >= star
+                        ? "gold"
+                        : "gray",
                     fontSize: "1.5rem",
                   }}
                 >
