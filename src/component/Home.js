@@ -13,7 +13,6 @@ const Home = () => {
     <div className="home-buttons">
       <button onClick={() => document.getElementById("search-btn").click()}>Search Recipes</button>
       <button onClick={() => document.getElementById("image-upload").click()}>Upload Image</button>
-      <button onClick={() => document.getElementById("liked").click()}>View Favorites</button>
     </div>
   </div>
 </section>
